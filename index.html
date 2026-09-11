@@ -6,17 +6,17 @@
     <title>Hide The Evidence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { user-select: none; -webkit-user-select: none; background: #090d16; color: white; overflow: hidden; font-family: system-ui, sans-serif; }
+        body { user-select: none; -webkit-user-select: none; background: #0f172a; color: white; overflow: hidden; font-family: system-ui, sans-serif; }
         .draggable { touch-action: none; cursor: grab; }
         .draggable:active { cursor: grabbing; }
         @keyframes shake {
             0%, 100% { transform: translate(0, 0); }
-            20% { transform: translate(-10px, 5px); }
-            40% { transform: translate(10px, -5px); }
-            60% { transform: translate(-5px, -10px); }
-            80% { transform: translate(5px, 10px); }
+            20% { transform: translate(-8px, 4px); }
+            40% { transform: translate(8px, -4px); }
+            60% { transform: translate(-4px, -8px); }
+            80% { transform: translate(4px, 8px); }
         }
-        .shake-active { animation: shake 0.25s infinite; }
+        .shake-active { animation: shake 0.3s infinite; }
     </style>
 </head>
 <body class="w-screen h-screen flex flex-col items-center justify-center relative">
@@ -24,22 +24,16 @@
     <!-- MAIN MENU -->
     <div id="main-menu" class="absolute inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
         <h1 class="text-4xl font-black mb-2 text-red-500 tracking-wider">HIDE THE EVIDENCE</h1>
-        <p class="text-slate-400 mb-6 max-w-sm text-sm">Boyfriend is at the door! Drag and hide all scattered evidence around the room before time runs out!</p>
+        <p class="text-slate-400 mb-6 max-w-sm text-sm">Boyfriend is at the door! Drag and hide all the scattered evidence around the room before time runs out!</p>
         
-        <button onclick="startGame()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-4 rounded-xl text-lg shadow-lg shadow-red-900/50 transition transform active:scale-95 mb-3 w-64">
+        <button onclick="startGame()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-4 rounded-xl text-lg shadow-lg shadow-red-900/50 transition transform active:scale-95 mb-4 w-64">
             START PANIC
-        </button>
-
-        <button onclick="generateRandomScene()" id="ai-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-lg transition transform active:scale-95 mb-3 w-64 flex items-center justify-center gap-2">
-            <span>✨ Generate AI Scene</span>
         </button>
 
         <label class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-6 py-3 rounded-xl text-sm border border-slate-700 cursor-pointer transition w-64 flex items-center justify-center gap-2">
             <span>📁 Upload Background</span>
             <input type="file" id="bg-upload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
         </label>
-        
-        <p id="loading-status" class="text-xs text-purple-400 mt-3 h-4"></p>
     </div>
 
     <!-- GAME CONTAINER -->
@@ -69,7 +63,7 @@
                 Suitcase
             </div>
 
-            <!-- Draggable Evidence -->
+            <!-- Draggable Evidence Items -->
             <div class="draggable absolute bottom-24 left-1/2 -translate-x-1/2 p-3 bg-red-600/90 text-white font-bold rounded-lg shadow-xl border border-red-400 flex items-center gap-2 text-sm" data-id="dress" style="touch-action: none;">
                 👗 Red Dress
             </div>
@@ -159,42 +153,7 @@
             }
         }
 
-        async function generateRandomScene() {
-            const status = document.getElementById('loading-status');
-            const btn = document.getElementById('ai-btn');
-            status.innerText = "Painting new scene...";
-            btn.disabled = true;
-
-            try {
-                const aiPrompt = "A highly detailed digital painting of a dimly lit hotel room. A bare-chested Caucasian man and an athletic blonde woman in underwear pushing against a wooden door. Cinematic lighting.";
-                
-                // Calls Gemini API for image generation
-                const client = new GoogleGenAI();
-                const response = await client.models.generateImages({
-                    model: 'gemini-3.1-flash-image',
-                    prompt: aiPrompt,
-                    config: { numberOfImages: 1, outputMimeType: 'image/jpeg', aspectRatio: '9:16' }
-                });
-
-                if (response.generatedImages && response.generatedImages.length > 0) {
-                    const base64Data = response.generatedImages[0].image.imageBytes;
-                    document.getElementById('scene-bg').style.backgroundImage = `url('data:image/jpeg;base64,${base64Data}')`;
-                    status.innerText = "Scene loaded!";
-                }
-            } catch (err) {
-                status.innerText = "Using randomized backup scene.";
-                // Fallback curated backgrounds if api context varies
-                const backups = [
-                    'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=1000',
-                    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1000'
-                ];
-                document.getElementById('scene-bg').style.backgroundImage = `url('${backups[Math.floor(Math.random() * backups.length)]}')`;
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        // Drag and Drop Engine
+        // Smooth Touch & Mouse Dragging Engine
         const draggables = document.querySelectorAll('.draggable');
         draggables.forEach(draggable => {
             let startX = 0, startY = 0, currentX = 0, currentY = 0;
